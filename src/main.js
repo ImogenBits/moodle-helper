@@ -28,9 +28,9 @@ function parseCSV(file) {
         const [group, points, ...comment] = line.split(",").map((s) => s.trim());
         switch (comment.length) {
           case 0:
-            return [group, [points, ""]];
+            return [group, [Number(points), ""]];
           case 1:
-            return [group, [points, comment[0]]];
+            return [group, [Number(points), comment[0]]];
           default:
             throw "incorrectly formatted file";
         }
@@ -39,6 +39,7 @@ function parseCSV(file) {
 }
 
 function fillInMarks(marks) {
+  var overriden = false;
   for (const row of document.getElementsByTagName("tr")) {
     const groupElem = row.getElementsByClassName("c5")[0];
     const inputElem = row.getElementsByClassName("c6")[0]?.getElementsByTagName("input")[0];
@@ -48,20 +49,30 @@ function fillInMarks(marks) {
     }
     const matches = [...groupElem.textContent.matchAll(/Abgabegruppe (\d+)/g)];
     if (matches.length === 0) {
-      console.log(matches);
       continue;
     }
     const groupNum = matches[0][1];
     if (!(groupNum in marks)) {
       continue;
     }
-    if (inputElem.value === "") {
+    if (
+      (inputElem.value !== "" && Number(inputElem.value) !== marks[groupNum][0]) ||
+      (feedbackElem.value !== "" && feedbackElem.value !== marks[groupNum][1])
+    ) {
+      row.classList.remove("unselectedrow");
+      row.classList.add("selectedrow");
+      overriden = true;
+    }
+    if (Number(inputElem.value) !== marks[groupNum][0]) {
+      inputElem.parentElement.classList.add("quickgrademodified");
       inputElem.value = marks[groupNum][0];
+    }
+    if (feedbackElem.value !== marks[groupNum][1]) {
+      feedbackElem.parentElement.classList.add("quickgrademodified");
       feedbackElem.value = marks[groupNum][1];
-    } else {
-      console.log(`group ${groupNum} already marked`);
     }
   }
+  return overriden;
 }
 
 async function main() {
@@ -72,18 +83,26 @@ async function main() {
 
 const quickSaveButton = document.getElementById("id_savequickgrades");
 if (quickSaveButton) {
+  const messageElem = document.createElement("span");
+  messageElem.hidden = true;
+  messageElem.style.marginLeft = "1rem";
   const inputElem = document.createElement("input");
   inputElem.type = "file";
   inputElem.style.display = "none";
   inputElem.onchange = async () => {
-    if (inputElem.files[0] === undefined) {
+    if (!inputElem.files || inputElem.files[0] === undefined) {
       return;
     }
-    fillInMarks(parseCSV(await inputElem.files[0].text()));
-  }
+    const didOverwrite = fillInMarks(parseCSV(await inputElem.files[0].text()));
+    messageElem.textContent = "Imported data, double check it's correct and submit with the button below."
+    if (didOverwrite) {
+      messageElem.textContent += " Overwrote some data, affected rows are highlighted.";
+    }
+    messageElem.hidden = false;
+    inputElem.files = null;
+  };
   const inputButton = document.createElement("button");
-  inputButton.classList.add("btn");
-  inputButton.classList.add("btn-primary");
+  inputButton.classList.add("btn", "btn-primary");
   inputButton.innerText = "Import from file";
   inputButton.type = "button";
   inputButton.onclick = function () {
@@ -93,6 +112,7 @@ if (quickSaveButton) {
   const buttonRow = quickSaveButton.parentElement.parentElement.cloneNode(true);
   buttonRow.id = "fitem_id_uploadgradefile";
   buttonRow.childNodes[3].childNodes[1].replaceWith(inputButton);
-  inputButton.after(inputElem);
+  inputButton.after(messageElem);
+  messageElem.after(inputElem);
   quickSaveButton.parentElement.parentElement.before(buttonRow);
 }
