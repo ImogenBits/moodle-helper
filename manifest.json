@@ -15,5 +15,13 @@
             "16": "images/icon16.png",
             "32": "images/icon32.png"
         }
-    }
+    },
+    "content_scripts": [
+      {
+        "js": ["src/main.js"],
+        "matches": [
+          "https://moodle.rwth-aachen.de/*"
+        ]
+      }
+    ]
 }

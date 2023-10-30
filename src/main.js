@@ -69,3 +69,30 @@ async function main() {
   const marks = parseCSV(text);
   fillInMarks(marks);
 }
+
+const quickSaveButton = document.getElementById("id_savequickgrades");
+if (quickSaveButton) {
+  const inputElem = document.createElement("input");
+  inputElem.type = "file";
+  inputElem.style.display = "none";
+  inputElem.onchange = async () => {
+    if (inputElem.files[0] === undefined) {
+      return;
+    }
+    fillInMarks(parseCSV(await inputElem.files[0].text()));
+  }
+  const inputButton = document.createElement("button");
+  inputButton.classList.add("btn");
+  inputButton.classList.add("btn-primary");
+  inputButton.innerText = "Import from file";
+  inputButton.type = "button";
+  inputButton.onclick = function () {
+    inputElem.click();
+  };
+
+  const buttonRow = quickSaveButton.parentElement.parentElement.cloneNode(true);
+  buttonRow.id = "fitem_id_uploadgradefile";
+  buttonRow.childNodes[3].childNodes[1].replaceWith(inputButton);
+  inputButton.after(inputElem);
+  quickSaveButton.parentElement.parentElement.before(buttonRow);
+}
