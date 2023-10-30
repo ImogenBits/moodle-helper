@@ -63,7 +63,7 @@ function fillInMarks(marks) {
       row.classList.add("selectedrow");
       overriden = true;
     }
-    if (Number(inputElem.value) !== marks[groupNum][0]) {
+    if (inputElem.value === "" || Number(inputElem.value) !== marks[groupNum][0]) {
       inputElem.parentElement.classList.add("quickgrademodified");
       inputElem.value = marks[groupNum][0];
     }
