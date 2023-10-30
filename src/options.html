@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Moodle Grading Helper Options</title>
+    <style>
+      body {
+        background-color: linen;
+      }
+
+      input {
+        margin-bottom: 1.5rem;
+        margin-top: 0.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <label>
+      Website this extension is active on
+      <input type="url" id="activePage" />
+    </label>
+
+    <label>
+      Group identifier pattern
+      <input type="text" id="groupPattern" />
+    </label>
+
+    <div id="status"></div>
+    <button class="btn btn-primary" id="save">Save</button>
+
+    <script src="options.js"></script>
+  </body>
+</html>

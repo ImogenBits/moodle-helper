@@ -10,18 +10,21 @@
     },
     "action": {
         "default_title": "Moodle Grading Helper",
-        "default_popup": "src/menu.html",
+        "default_popup": "src/options.html",
         "default_icon": {
             "16": "images/icon16.png",
             "32": "images/icon32.png"
         }
     },
-    "content_scripts": [
-      {
-        "js": ["src/main.js"],
-        "matches": [
-          "https://moodle.rwth-aachen.de/*"
-        ]
-      }
-    ]
+    "options_ui": {
+      "page": "src/options.html",
+      "open_in_tab": false
+    },
+    "permissions": [
+      "storage",
+      "scripting"
+    ],
+    "background": {
+      "service_worker": "src/service_worker.js"
+    }
 }

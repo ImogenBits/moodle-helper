@@ -1,3 +1,15 @@
+/** @type RegExp */
+var groupRegex;
+chrome.storage.sync.get("groupPattern", (items) => {
+  groupRegex = new RegExp(items.groupPattern);
+});
+
+chrome.storage.sync.onChanged.addListener(changes => {
+  if (changes.groupPattern?.newValue) {
+    groupRegex = new RegExp(changes.groupPattern.newValue);
+  }
+});
+
 async function getFileContent() {
   const inputElem = document.createElement("input");
   inputElem.type = "file";
@@ -47,7 +59,7 @@ function fillInMarks(marks) {
     if (groupElem === undefined || groupElem.textContent === null || inputElem === undefined) {
       continue;
     }
-    const matches = [...groupElem.textContent.matchAll(/Abgabegruppe (\d+)/g)];
+    const matches = [...groupElem.textContent.matchAll(groupRegex)];
     if (matches.length === 0) {
       continue;
     }
