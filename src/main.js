@@ -1,12 +1,17 @@
 /** @type RegExp */
 var groupRegex;
-chrome.storage.sync.get("groupPattern", (items) => {
-  groupRegex = new RegExp(items.groupPattern);
+var groupColumn;
+chrome.storage.sync.get(["groupPattern", "groupColumn"], (items) => {
+  groupRegex = new RegExp(items.groupPattern, "g");
+  groupColumn = items.groupColumn;
 });
 
-chrome.storage.sync.onChanged.addListener(changes => {
+chrome.storage.sync.onChanged.addListener((changes) => {
   if (changes.groupPattern?.newValue) {
-    groupRegex = new RegExp(changes.groupPattern.newValue);
+    groupRegex = new RegExp(changes.groupPattern.newValue, "g");
+  }
+  if (changes.groupColumn?.newValue) {
+    groupColumn = items.groupColumn;
   }
 });
 
@@ -50,12 +55,21 @@ function parseCSV(file) {
   );
 }
 
-function fillInMarks(marks) {
+/**
+ *
+ * @param {HTMLTableRowElement[]} table
+ * @param {{ [key: string]: [number, string] }} marks
+ * @returns
+ */
+function fillInMarks(table, marks) {
   var overriden = false;
-  for (const row of document.getElementsByTagName("tr")) {
-    const groupElem = row.getElementsByClassName("c5")[0];
-    const inputElem = row.getElementsByClassName("c6")[0]?.getElementsByTagName("input")[0];
-    const feedbackElem = row.getElementsByClassName("c12")[0]?.getElementsByTagName("textarea")[0];
+  const columns = [...table.querySelectorAll("thead th")];
+  const groupColIndex = columns.indexOf(columns.find((c) => c.innerText.includes(groupColumn)));
+
+  for (const row of table.querySelectorAll("tbody tr")) {
+    const groupElem = row.children[groupColIndex];
+    const inputElem = row.querySelector("input.quickgrade");
+    const feedbackElem = row.querySelector("textarea.quickgrade");
     if (groupElem === undefined || groupElem.textContent === null || inputElem === undefined) {
       continue;
     }
@@ -87,14 +101,11 @@ function fillInMarks(marks) {
   return overriden;
 }
 
-async function main() {
-  const text = await getFileContent();
-  const marks = parseCSV(text);
-  fillInMarks(marks);
-}
+const gradingForms = document.getElementsByClassName("quickgradingform");
+if (gradingForms.length !== 0) {
+  const gradingTable = gradingForms[0].getElementsByTagName("table")[0];
 
-const quickSaveButton = document.getElementById("id_savequickgrades");
-if (quickSaveButton) {
+  const quickSaveButton = document.getElementById("id_savequickgrades");
   const messageElem = document.createElement("span");
   messageElem.hidden = true;
   messageElem.style.marginLeft = "1rem";
@@ -105,13 +116,15 @@ if (quickSaveButton) {
     if (!inputElem.files || inputElem.files[0] === undefined) {
       return;
     }
-    const didOverwrite = fillInMarks(parseCSV(await inputElem.files[0].text()));
-    messageElem.textContent = "Imported data, double check it's correct and submit with the button below."
+    const didOverwrite = fillInMarks(gradingTable, parseCSV(await inputElem.files[0].text()));
+    messageElem.textContent =
+      "Imported data, double check it's correct and submit with the button below.";
     if (didOverwrite) {
-      messageElem.textContent += " Overwrote some data, affected rows are highlighted.";
+      messageElem.textContent += " This ovverwrote some data, affected rows are highlighted.";
     }
     messageElem.hidden = false;
     inputElem.files = null;
+    inputElem.value = "";
   };
   const inputButton = document.createElement("button");
   inputButton.classList.add("btn", "btn-primary");
