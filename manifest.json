@@ -21,10 +21,14 @@
       "open_in_tab": false
     },
     "permissions": [
-      "storage",
-      "scripting"
+      "storage"
     ],
-    "background": {
-      "service_worker": "src/service_worker.js"
-    }
+    "content_scripts": [
+      {
+        "js": ["src/main.js"],
+        "matches": [
+          "https://moodle.rwth-aachen.de/*"
+        ]
+      }
+    ]
 }

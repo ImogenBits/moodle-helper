@@ -1,5 +1,4 @@
 const saveOptions = () => {
-  const activePage = document.getElementById("activePage").value;
   const groupPattern = document.getElementById("groupPattern").value;
   const status = document.getElementById("status");
 
@@ -10,7 +9,7 @@ const saveOptions = () => {
     return;
   }
 
-  chrome.storage.sync.set({ activePage: activePage, groupPattern: groupPattern }, () => {
+  chrome.storage.sync.set({ groupPattern: groupPattern }, () => {
     status.textContent = "Options saved.";
     setTimeout(() => {
       status.textContent = "";
@@ -20,9 +19,8 @@ const saveOptions = () => {
 
 const restoreOptions = () => {
   chrome.storage.sync.get(
-    { activePage: "https://moodle.rwth-aachen.de/*", groupPattern: "Abgabegruppe (d+)" },
+    { groupPattern: "Abgabegruppe (d+)" },
     (items) => {
-      document.getElementById("activePage").value = items.activePage;
       document.getElementById("groupPattern").value = items.groupPattern;
     }
   );
