@@ -83,7 +83,7 @@ function fillInMarks(table, marks) {
     }
     if (
       (inputElem.value !== "" && Number(inputElem.value) !== marks[groupNum][0]) ||
-      (feedbackElem.value !== "" && feedbackElem.value !== marks[groupNum][1])
+      (feedbackElem && feedbackElem.value !== "" && feedbackElem.value !== marks[groupNum][1])
     ) {
       row.classList.remove("unselectedrow");
       row.classList.add("selectedrow");
@@ -93,7 +93,7 @@ function fillInMarks(table, marks) {
       inputElem.parentElement.classList.add("quickgrademodified");
       inputElem.value = marks[groupNum][0];
     }
-    if (feedbackElem.value !== marks[groupNum][1]) {
+    if (feedbackElem && feedbackElem.value !== marks[groupNum][1]) {
       feedbackElem.parentElement.classList.add("quickgrademodified");
       feedbackElem.value = marks[groupNum][1];
     }
