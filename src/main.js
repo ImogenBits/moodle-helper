@@ -11,7 +11,7 @@ chrome.storage.sync.onChanged.addListener((changes) => {
     groupRegex = new RegExp(changes.groupPattern.newValue, "g");
   }
   if (changes.groupColumn?.newValue) {
-    groupColumn = items.groupColumn;
+    groupColumn = changes.groupColumn.newValue;
   }
 });
 
