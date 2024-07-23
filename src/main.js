@@ -12,7 +12,7 @@
  * }} student_data
  * @returns
  */
-function fillInGrades(table, student_data) {
+function fillInData(table, student_data) {
   var overriden = false;
   const columns = [...table.querySelectorAll("thead th")];
   const groupColIndex = columns.indexOf(
@@ -42,7 +42,7 @@ function fillInGrades(table, student_data) {
       inputElem.parentElement.classList.add("quickgrademodified");
       inputElem.value = curr_data.points;
     }
-    if (feedbackElem && feedbackElem.value !== curr_data.feedback) {
+    if (curr_data.feedback && feedbackElem && feedbackElem.value !== curr_data.feedback) {
       feedbackElem.parentElement.classList.add("quickgrademodified");
       feedbackElem.value = curr_data.feedback;
     }
@@ -52,17 +52,18 @@ function fillInGrades(table, student_data) {
 
 /**
  *
+ * @param {HTMLTableElement} gradingTable
  * @param {Event} event
  * @returns
  */
-async function fileSelect(event) {
-  if (!event.target?.files || event.target.files[0] === undefined) {
+async function fileSelect(gradingTable, event) {
+  if (!event.target?.files[0]) {
     return;
   }
-  const text = await files[0].text();
+  const text = await event.target.files[0].text();
   const student_data = await JSON.parse(text);
 
-  const didOverwrite = fillInMarks(gradingTable, student_data);
+  const didOverwrite = fillInData(gradingTable, student_data);
   messageElem.textContent =
     "Imported data, double check it's correct and submit with the button below.";
   if (didOverwrite) {
@@ -84,7 +85,9 @@ if (gradingForms.length !== 0) {
   const inputElem = document.createElement("input");
   inputElem.type = "file";
   inputElem.style.display = "none";
-  inputElem.onchange = fileSelect;
+  inputElem.onchange = async (e) => {
+    fileSelect(gradingTable, e);
+  };
   const inputButton = document.createElement("button");
   inputButton.classList.add("btn", "btn-primary");
   inputButton.innerText = "Import from file";
