@@ -7,6 +7,7 @@
  *     [key: string]: {
  *       points: Number | null;
  *       feedback?: string;
+ *       found?: Boolean;
  *     }
  *   }
  * }} student_data
@@ -30,6 +31,7 @@ function fillInData(table, student_data) {
     if (!curr_data) {
       continue;
     }
+    curr_data.found = true;
     if (
       (inputElem.value !== "" && Number(inputElem.value) !== curr_data.points) ||
       (feedbackElem && feedbackElem.value !== "" && feedbackElem.value !== curr_data.feedback)
@@ -52,11 +54,12 @@ function fillInData(table, student_data) {
 
 /**
  *
+ * @param {HTMLSpanElement} messageElem
  * @param {HTMLTableElement} gradingTable
  * @param {Event} event
  * @returns
  */
-async function fileSelect(gradingTable, event) {
+async function fileSelect(messageElem, gradingTable, event) {
   if (!event.target?.files[0]) {
     return;
   }
@@ -68,6 +71,14 @@ async function fileSelect(gradingTable, event) {
     "Imported data, double check it's correct and submit with the button below.";
   if (didOverwrite) {
     messageElem.textContent += " This overwrote some data, affected rows are highlighted.";
+  }
+  const missedGroups = Object.entries(student_data.data).reduce(
+    (acc, [key, val]) => (val.found ? acc : [...acc, key]),
+    []
+  );
+  if (missedGroups.length != 0) {
+    messageElem.textContent +=
+      "\nCould not find the following groups in the table: " + missedGroups.join(", ");
   }
   messageElem.hidden = false;
   inputElem.files = null;
@@ -86,7 +97,7 @@ if (gradingForms.length !== 0) {
   inputElem.type = "file";
   inputElem.style.display = "none";
   inputElem.onchange = async (e) => {
-    fileSelect(gradingTable, e);
+    fileSelect(messageElem, gradingTable, e);
   };
   const inputButton = document.createElement("button");
   inputButton.classList.add("btn", "btn-primary");
