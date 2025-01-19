@@ -68,9 +68,9 @@ async function fileSelect(messageElem, gradingTable, event) {
 
   const didOverwrite = fillInData(gradingTable, student_data);
   messageElem.textContent =
-    "Imported data, double check it's correct and submit with the button below.";
+    "Imported data, double check it's correct before saving.";
   if (didOverwrite) {
-    messageElem.textContent += " This overwrote some data, affected rows are highlighted.";
+    messageElem.textContent += "\nThis overwrote some data, affected rows are highlighted.";
   }
   const missedGroups = Object.entries(student_data.data).reduce(
     (acc, [key, val]) => (val.found ? acc : [...acc, key]),
@@ -88,8 +88,7 @@ async function fileSelect(messageElem, gradingTable, event) {
 const gradingForms = document.getElementsByClassName("quickgradingform");
 if (gradingForms.length !== 0) {
   const gradingTable = gradingForms[0].getElementsByTagName("table")[0];
-
-  const quickSaveButton = document.getElementById("id_savequickgrades");
+  
   const messageElem = document.createElement("span");
   messageElem.hidden = true;
   messageElem.style.marginLeft = "1rem";
@@ -106,11 +105,7 @@ if (gradingForms.length !== 0) {
   inputButton.onclick = function () {
     inputElem.click();
   };
-
-  const buttonRow = quickSaveButton.parentElement.parentElement.cloneNode(true);
-  buttonRow.id = "fitem_id_uploadgradefile";
-  buttonRow.childNodes[3].childNodes[1].replaceWith(inputButton);
-  inputButton.after(messageElem);
-  messageElem.after(inputElem);
-  quickSaveButton.parentElement.parentElement.before(buttonRow);
+  
+  const quickSaveButton = document.querySelector("[data-region=quick-grading-save]");
+  quickSaveButton.parentElement.before(messageElem, inputElem, inputButton);
 }
